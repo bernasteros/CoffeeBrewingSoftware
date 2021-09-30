@@ -107,7 +107,6 @@ def move_money(money):
                 try:
                     insert = float(input("How much " + cents + " ?\n>> ")) 
                     insert *= coins[cents]
-
                     money += insert
                 except ValueError:
                     print("Sorry, invalid input, continuing...")
@@ -127,6 +126,9 @@ def show_funds(money):
 
 def make_coffee(money, resource, menu_dict, coffee_name):
     """Main function that produces the coffee of choice, given that money and resources are sufficient"""
+    coffee_cost = menu_dict[coffee_name]["cost"]
+    # Hier noch Resourcen_check und Geldabzug einbauen
+    
 
 # Programm Start from here
 money = 0.0
@@ -148,3 +150,8 @@ while selection:
         pass
     elif select == "m":
         money = move_money(money)
+    else:
+      print("\nNo valid input, shutting down machine...")
+      sleep(1)
+      print("Thank you for dropping by :)")
+      selection = False
