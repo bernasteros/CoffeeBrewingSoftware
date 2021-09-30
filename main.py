@@ -21,7 +21,7 @@ def report_menu(content_dict):
         print(logo)
         print("= Resource Management =\n")
         for resource in content_dict:
-
+            sleep(0.1)
             if resource == "coffee":
                 print("{}: {}g\n".format(resource,content_dict[resource]))
             else:    
@@ -76,19 +76,75 @@ def coffee_menu(menu_dict):
     print("Coffee Menu - Please make your choice!\n")
     counter = 0
     for coffee in menu_dict:
+        sleep(0.1)
         counter += 1
         for cost in menu_dict[coffee]:
             if cost == "cost":
                 print(f"{counter}. {coffee} - EUR {menu_dict[coffee][cost]}\n")
 
+def move_money(money):
+    transaction = True
+    
+    while transaction:
+        clear()
+        print(logo)
+        print("Credit Menue\n")
+
+        if money == 0.0:
+            direction = "i"
+        else:
+            direction = input("(i)nsert or (w)hitdraw Credits? > ").lower()
+        
+        if direction == "i":
+            print("Bitte Münzen einwerfen")
+            coins = {
+            "zehnerl" : 0.10,
+            "zwanzgerl" : 0.20,
+            "fufzgerl" : 0.50,
+            }
+
+            for cents in coins:
+                try:
+                    insert = float(input("Wie viele " + cents + " ? >> ")) 
+                    insert *= coins[cents]
+
+                    money += insert
+                except ValueError:
+                    print("Sorry, invalid input, continuing...")
+                    sleep(1)
+            return money    
+        elif direction == "w":
+            money = 0.0
+            print("Returning money...")
+            sleep(1)
+            return money
+        else:
+            print("Unknown input...")
+
+def show_funds(money):
+    sleep(0.1)
+    print("|| Current Credits available: EUR" + str(money) +"\n")
+
+def make_coffee(money, resource, menu_dict, coffee_name):
+    """Main function that produces the coffee of choice, given that money and resources are sufficient"""
+
 # Programm Start from here
-funds = 0.0
+money = 0.0
 
 selection = True
 while selection:
     coffee_menu(MENU)
     resource_check(resources,MENU)
+    show_funds(money)
 
-    select = input("Please select Coffee Number: ")
+    select = input("Please select Coffee Number\n or 'm' for credit menue: ")
     if select == "0":
         report_menu(resources)
+    elif select == "1":
+        pass
+    elif select == "2":
+        pass
+    elif select == "3":      
+        pass
+    elif select == "m":
+        money = move_money(money)
