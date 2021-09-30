@@ -96,16 +96,16 @@ def move_money(money):
             direction = input("(i)nsert or (w)hitdraw Credits? > ").lower()
         
         if direction == "i":
-            print("Bitte Münzen einwerfen")
+            print("Please insert Coins:")
             coins = {
-            "zehnerl" : 0.10,
-            "zwanzgerl" : 0.20,
-            "fufzgerl" : 0.50,
+            "tens" : 0.10,
+            "twenties" : 0.20,
+            "fifties" : 0.50,
             }
 
             for cents in coins:
                 try:
-                    insert = float(input("Wie viele " + cents + " ? >> ")) 
+                    insert = float(input("How much " + cents + " ?\n>> ")) 
                     insert *= coins[cents]
 
                     money += insert
@@ -123,7 +123,7 @@ def move_money(money):
 
 def show_funds(money):
     sleep(0.1)
-    print("|| Current Credits available: EUR" + str(money) +"\n")
+    print("|| Current Credits available: EUR " + str(money) +"\n")
 
 def make_coffee(money, resource, menu_dict, coffee_name):
     """Main function that produces the coffee of choice, given that money and resources are sufficient"""
