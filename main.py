@@ -151,7 +151,11 @@ while selection:
     elif select == "m":
         money = move_money(money)
     else:
-      print("\nNo valid input, shutting down machine...")
+      if money != 0.0:
+          print("\nReturning money...")
+          money = 0.0
+          sleep(1)        
+      print("\nShutting down machine...")
       sleep(1)
       print("Thank you for dropping by :)")
       selection = False
