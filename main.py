@@ -39,38 +39,50 @@ def refill(content_dict):
     If the resource is at max, or it does not exist, it returns without changing anything"""
 
     need = input("What do you want to refill? >>> ").lower()
-    for resource in content_dict:
-        if need not in content_dict:
-            print("Error: No such material to refill, please make a valid choice!")
-            sleep(3)
-            return content_dict
-        else:
-            if need == "water" and content_dict[resource] < 300:
-                content_dict[resource] = 300
-                print("Watertank has been refilled to 300ml")
-            elif need == "milk" and content_dict[resource] < 200:
-                content_dict[resource] = 200
-                print("Milk has been refilled to 200ml")
-            elif need == "coffee" and content_dict[resource] < 100:
-                content_dict[resource] = 100
-                print("Coffee has been refilled to 100g")
-            else:
-                print("Already filled 100%")
-            sleep(2)
+    if need not in content_dict:
+        print("Error: No such material to refill, please make a valid choice!")
+        sleep(3)
         return content_dict
-        # TODO Please double check refill function (refills only water, rest always full)
+    if need == "water":
+        if content_dict[need] < 300:
+            content_dict[need] = 300
+            print("Watertank has been refilled to 300ml")
+        else:
+            print("Already filled 100%")
+            sleep(2)
+    elif need == "milk":
+        if content_dict[need] < 200:
+            content_dict[need] = 200
+            print("Milk has been refilled to 200ml")
+        else:
+            print("Already filled 100%")
+            sleep(2)
+    elif need == "coffee":
+        if content_dict[need] < 100:
+            content_dict[need] = 100
+            print("Coffee has been refilled to 100g")
+        else:
+            print("Already filled 100%")
+    sleep(2)
+    return content_dict
 
 
 def low_resource_information(materials, menu_dict):
     """Compares the materials in the machine with the menu plan.
     If there is at least one drink with more resource needs than available it puts out a warning"""
-    for drink in menu_dict:
-        coffee_ingredient = menu_dict[drink]["ingredients"]
-        for ingredient in coffee_ingredient:
-            for stock in materials:
-                if stock == ingredient and materials[stock] < coffee_ingredient[ingredient]:
-                    print("⚠️ Warning: Low " + ingredient + " ⚠")
-                    return
+    please_refill = ""
+    enough_material = True
+    biggest_drink = menu_dict["cappuccino"]["ingredients"]
+
+    for ingredient in biggest_drink:
+        if materials[ingredient] < biggest_drink[ingredient]:
+            please_refill += " " + ingredient
+            enough_material = False
+
+    if enough_material:
+        pass
+    else:
+        print("⚠️ Warning please consider refill for following ⚠\n" + please_refill)
 
 
 def coffee_menu(menu_dict):
@@ -130,15 +142,30 @@ def show_funds(credit):
     print("|| Current Credits available: EUR " + str(credit) + "\n")
 
 
-def check_funds(credit, menu_dict, coffee_name):
-    coffee_cost = menu_dict[coffee_name]["cost"]
+def check_funds(credit, menu_dict, materials, coffee_name):
 
-    if coffee_cost > credit:
-        print(f"Sorry, for a {coffee_name} please insert additional EUR {coffee_cost - credit}")
-        sleep(3)
-        return False
+    coffee_cost = menu_dict[coffee_name]["cost"]
+    coffee_ingredient = menu_dict[coffee_name]["ingredients"]
+    enough_ingredients = True
+    please_refill = ""
+
+    for ingredient in coffee_ingredient:
+        if materials[ingredient] < coffee_ingredient[ingredient]:
+            please_refill += " " + ingredient
+            enough_ingredients = False
+        else:
+            continue
+
+    if enough_ingredients:
+        if coffee_cost > credit:
+            print(f"Sorry, for a {coffee_name} please insert EUR {coffee_cost - credit}")
+            sleep(2)
+            return False
+        else:
+            return True
     else:
-        return True
+        print(f"Sorry, too low material for a {coffee_name} please refill:\n {please_refill}")
+        return False
 
 
 def charge_coffee(credit, menu_dict, coffee_name):
@@ -146,17 +173,9 @@ def charge_coffee(credit, menu_dict, coffee_name):
     return credit - coffee_cost
 
 
-def make_coffee(credit, resource, menu_dict, coffee_name):
+def make_coffee(resource, menu_dict, coffee_name):
     """Main function that produces the coffee of choice, given that money and resources are sufficient"""
     coffee_resource = menu_dict[coffee_name]["ingredients"]
-    coffee_cost = menu_dict[coffee_name]["cost"]
-
-    credit -= coffee_cost
-
-    for i in coffee_resource:
-        if coffee_resource[i] > resource[i]:
-            print(f"Error, {i} is too low. Please refill {i}")
-            return resource
 
     for i in coffee_resource:
         resource[i] -= coffee_resource[i]
@@ -183,19 +202,19 @@ while selection:
     if select == "0":
         report_menu(resources)
     elif select == "1":
-        if check_funds(money, MENU, "espresso"):
+        if check_funds(money, MENU, resources, "espresso"):
             money = charge_coffee(money, MENU, "espresso")
-            resources = make_coffee(money, resources, MENU, "espresso")
+            resources = make_coffee(resources, MENU, "espresso")
         sleep(2)
     elif select == "2":
-        if check_funds(money, MENU, "latte"):
+        if check_funds(money, MENU, resources, "latte"):
             money = charge_coffee(money, MENU, "latte")
-            resources = make_coffee(money, resources, MENU, "latte")
+            resources = make_coffee(resources, MENU, "latte")
         sleep(2)
     elif select == "3":
-        if check_funds(money, MENU, "cappuccino"):
+        if check_funds(money, MENU, resources, "cappuccino"):
             money = charge_coffee(money, MENU, "cappuccino")
-            resources = make_coffee(money, resources, MENU, "cappuccino")
+            resources = make_coffee(resources, MENU, "cappuccino")
         sleep(2)
     elif select == "m":
         money = move_money(money)
