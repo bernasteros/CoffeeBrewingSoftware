@@ -48,7 +48,6 @@ def refill(content_dict):
             if need == "water" and content_dict[resource] < 300:
                 content_dict[resource] = 300
                 print("Watertank has been refilled to 300ml")
-
             elif need == "milk" and content_dict[resource] < 200:
                 content_dict[resource] = 200
                 print("Milk has been refilled to 200ml")
@@ -58,10 +57,11 @@ def refill(content_dict):
             else:
                 print("Already filled 100%")
             sleep(2)
-            return content_dict
+        return content_dict
+        # TODO Please double check refill function (refills only water, rest always full)
 
 
-def resource_check(materials, menu_dict):
+def low_resource_information(materials, menu_dict):
     """Compares the materials in the machine with the menu plan.
     If there is at least one drink with more resource needs than available it puts out a warning"""
     for drink in menu_dict:
@@ -69,7 +69,7 @@ def resource_check(materials, menu_dict):
         for ingredient in coffee_ingredient:
             for stock in materials:
                 if stock == ingredient and materials[stock] < coffee_ingredient[ingredient]:
-                    print("Warning: Low " + ingredient + " !")
+                    print("⚠️ Warning: Low " + ingredient + " ⚠")
                     return
 
 
@@ -92,7 +92,7 @@ def move_money(credit):
     while transaction:
         clear()
         print(logo)
-        print("Credit Menu\n")
+        print("€€€ Credit Menu\n")
 
         if credit == 0.0:
             direction = "i"
@@ -130,10 +130,39 @@ def show_funds(credit):
     print("|| Current Credits available: EUR " + str(credit) + "\n")
 
 
+def check_funds(credit, menu_dict, coffee_name):
+    coffee_cost = menu_dict[coffee_name]["cost"]
+
+    if coffee_cost > credit:
+        print(f"Sorry, for a {coffee_name} please insert additional EUR {coffee_cost - credit}")
+        sleep(3)
+        return False
+    else:
+        return True
+
+
+def charge_coffee(credit, menu_dict, coffee_name):
+    coffee_cost = menu_dict[coffee_name]["cost"]
+    return credit - coffee_cost
+
+
 def make_coffee(credit, resource, menu_dict, coffee_name):
     """Main function that produces the coffee of choice, given that money and resources are sufficient"""
+    coffee_resource = menu_dict[coffee_name]["ingredients"]
     coffee_cost = menu_dict[coffee_name]["cost"]
-    # TODO Implement Resource Check and money withdrawal
+
+    credit -= coffee_cost
+
+    for i in coffee_resource:
+        if coffee_resource[i] > resource[i]:
+            print(f"Error, {i} is too low. Please refill {i}")
+            return resource
+
+    for i in coffee_resource:
+        resource[i] -= coffee_resource[i]
+
+    print(f"Thank you, your {coffee_name} is being produced.\n Enjoy!")
+    return resource
 
 
 # Program Start from here
@@ -142,23 +171,35 @@ money = 0.0
 selection = True
 while selection:
     coffee_menu(MENU)
-    resource_check(resources, MENU)
+    low_resource_information(resources, MENU)
     show_funds(money)
-    # TODO Fill in the cases
-    # TODO Implement a "off" function
-    # TODO Reformat Text in Option Display
-    select = input("Please select Coffee Number\n or 'm' for credit menu: ")
+
+    select = input('\n'
+                   '     - Press a number for coffee\n'
+                   '     - Press \'m\' for credit menu\n'
+                   '     - Type \'off\' for shutting down system\n'
+                   '     >>> ')
+
     if select == "0":
         report_menu(resources)
     elif select == "1":
-        pass
+        if check_funds(money, MENU, "espresso"):
+            money = charge_coffee(money, MENU, "espresso")
+            resources = make_coffee(money, resources, MENU, "espresso")
+        sleep(2)
     elif select == "2":
-        pass
+        if check_funds(money, MENU, "latte"):
+            money = charge_coffee(money, MENU, "latte")
+            resources = make_coffee(money, resources, MENU, "latte")
+        sleep(2)
     elif select == "3":
-        pass
+        if check_funds(money, MENU, "cappuccino"):
+            money = charge_coffee(money, MENU, "cappuccino")
+            resources = make_coffee(money, resources, MENU, "cappuccino")
+        sleep(2)
     elif select == "m":
         money = move_money(money)
-    else:
+    elif select == "off":
         if money != 0.0:
             print("\nReturning money...")
             money = 0.0
